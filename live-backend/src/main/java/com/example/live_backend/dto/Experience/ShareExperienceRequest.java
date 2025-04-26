@@ -4,5 +4,6 @@ import lombok.Data;
 
 @Data
 public class ShareExperienceRequest {
-    private Long sharedWithUserId;
+    private Long experienceId;
+    private Long[] sharedWithUserIds;
 }

@@ -15,27 +15,25 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/experiences/{experienceId}/shares")
+@RequestMapping("/api/experience/share")
 @RequiredArgsConstructor
 public class ShareExperienceController {
 
     private final ShareExperienceService shareExperienceService;
 
-    @PostMapping("/{experienceId}/share")
+    @PostMapping()
     public ResponseEntity<Void> shareExperience(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable Long experienceId,
             @Valid @RequestBody ShareExperienceRequest request) {
-        shareExperienceService.shareExperience(experienceId, userDetails.getUserId(), request);   
+        shareExperienceService.shareExperience(request);   
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{experienceId}/share/{username}")
+    @DeleteMapping("/remove")
     public ResponseEntity<Void> unshareExperience(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable Long experienceId,
-            @PathVariable Long userId) {
-        shareExperienceService.unshareExperience(experienceId, userDetails.getUserId(), userId);
+            @Valid @RequestBody ShareExperienceRequest request) {
+        shareExperienceService.unshareExperience(request);
         return ResponseEntity.noContent().build();
     }
 

@@ -79,7 +79,7 @@ public class ExperienceService {
         throw new RuntimeException("Unauthorized access to experience");
     }
 
-    public Experience getExperienceEntityById(Long experienceId, Long userId) {
+    public Experience getExperienceEntityById(Long experienceId) {
         Experience experience = experienceRepository.findById(experienceId)
                 .orElseThrow(() -> new RuntimeException("Experience not found"));
         return experience;
@@ -87,8 +87,8 @@ public class ExperienceService {
 
 
     @Transactional
-    public ExperienceResponse updateExperience(Long experienceId, Long userId, ExperienceRequest request) {
-        Experience experience = getExperienceEntityById(experienceId, userId);   
+    public ExperienceResponse updateExperience(Long experienceId, ExperienceRequest request) {
+        Experience experience = getExperienceEntityById(experienceId);   
 
         experienceMapper.updateEntity(experience, request);
 
@@ -105,21 +105,21 @@ public class ExperienceService {
     }
 
     @Transactional
-    public void deleteExperience(Long experienceId, Long userId) {
-        Experience experience = getExperienceEntityById(experienceId, userId);
+    public void deleteExperience(Long experienceId) {
+        Experience experience = getExperienceEntityById(experienceId);
         experienceRepository.delete(experience);
     }
 
-    public List<ActivityResponse> getExperienceActivities(Long experienceId, Long userId) {
-        Experience experience = getExperienceEntityById(experienceId, userId);
+    public List<ActivityResponse> getExperienceActivities(Long experienceId) {
+        Experience experience = getExperienceEntityById(experienceId);
         return experience.getActivities().stream()
                 .map(activityMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public void deleteActivity(Long experienceId, Long activityId, Long userId) {
-        Experience experience = getExperienceEntityById(experienceId, userId);
+    public void deleteActivity(Long experienceId, Long activityId) {
+        Experience experience = getExperienceEntityById(experienceId);
         Activity activity = experience.getActivities().stream()
                 .filter(a -> a.getId().equals(activityId))
                 .findFirst()
@@ -129,14 +129,13 @@ public class ExperienceService {
         
     }
 
-    public List<ActivityResponse> generateActivities(Long experienceId, String prompt, Long userId) {
-        Experience experience = getExperienceEntityById(experienceId, userId);
-        User user = userService.getUserEntityById(userId);
-        return chatGPTService.generateActivitiesSuggestions(prompt, experience.getStartDate(), experience.getEndDate(), user.getLocation());
+    public List<ActivityResponse> generateActivities(Long experienceId, String prompt) {
+        Experience experience = getExperienceEntityById(experienceId);
+        return chatGPTService.generateActivitiesSuggestions(prompt, experience.getStartDate(), experience.getEndDate(), experience.getUser().getLocation());
     }
 
-    public List<ActivityResponse> refineExperience(Long experienceId, Long userId, String refinementPrompt) {
-        Experience experience = getExperienceEntityById(experienceId, userId);
+    public List<ActivityResponse> refineExperience(Long experienceId, String refinementPrompt) {
+        Experience experience = getExperienceEntityById(experienceId);
         List<Activity> activities = experience.getActivities();
         return chatGPTService.refineExperience(activities, refinementPrompt);
     }

@@ -30,17 +30,26 @@ export interface ActivityRequest {
   startTime: Date;     
 }
 
-export type ExperienceRequest = {
+export interface ExperienceRequest {
   title?: string;
   startDate?: Date;
   endDate?: Date;
   visibility?: 'PUBLIC' | 'PRIVATE' | 'FRIENDS';
   activities?: ActivityRequest[];
-  photo?: {
-    uri: string;
-    name: string;
-    type: string;
-  };
+  photo?: string;
+};
+
+export interface ExperienceResponse {
+  id: number;
+  title: string;
+  startDate: Date;
+  endDate: Date;
+  visibility: string;
+  activities: any[];
+  username: string;
+  createdAt: Date;
+  updatedAt: Date;
+  photoUrl: string;
 };
 
 export interface UserResponse {
@@ -48,4 +57,9 @@ export interface UserResponse {
   username: string;
   fullName: string;
   profilePicture: string;
+}
+
+export interface ShareExperienceRequest {
+  experienceId: number;
+  sharedWithUserIds: string[];
 }

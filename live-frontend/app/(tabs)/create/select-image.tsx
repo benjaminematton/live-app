@@ -22,11 +22,7 @@ export default function SelectImage() {
     if (isValid) {
         setExperienceData({
             ...experienceData,
-            photo: {
-                uri: imageUri,
-                name: 'photo',
-                type: 'image/jpeg',
-            },
+            photo: imageUri,
           });
       router.push('/create/select-date');
     }

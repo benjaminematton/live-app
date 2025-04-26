@@ -19,21 +19,21 @@ import com.example.live_backend.dto.Experience.ExperienceRequest;
 import com.example.live_backend.dto.Experience.ExperienceResponse;
 
 @RestController
-@RequestMapping("/api/experiences")
+@RequestMapping("/api/experience")
 @RequiredArgsConstructor
 public class ExperienceController {
 
     private final ExperienceService experienceService;
     private final ChatGPTService chatGPTService;
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<ExperienceResponse> createExperience(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody ExperienceRequest request) {
         return ResponseEntity.ok(experienceService.createExperience(userDetails.getUserId(), request));
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<ExperienceResponse>> getUserExperiences(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(experienceService.getUserExperiences(userDetails.getUserId()));
@@ -45,26 +45,26 @@ public class ExperienceController {
         return ResponseEntity.ok(experienceService.getUserUpcomingExperiences(userDetails.getUserId()));
     }
 
-    @GetMapping("/{scheduleId}")
+    @GetMapping("/{experienceId}")
     public ResponseEntity<ExperienceResponse> getExperienceById(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long experienceId) {
         return ResponseEntity.ok(experienceService.getExperienceById(experienceId, userDetails.getUserId()));    
     }
 
-    @PutMapping("/{scheduleId}")
+    @PutMapping("/{experienceId}")
     public ResponseEntity<ExperienceResponse> updateExperience(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long experienceId,
             @Valid @RequestBody ExperienceRequest request) {
-        return ResponseEntity.ok(experienceService.updateExperience(experienceId, userDetails.getUserId(), request));
+        return ResponseEntity.ok(experienceService.updateExperience(experienceId, request));
     }
 
-    @DeleteMapping("/{scheduleId}")
+    @DeleteMapping("/{experienceId}")
     public ResponseEntity<Void> deleteExperience(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long experienceId) {
-        experienceService.deleteExperience(experienceId, userDetails.getUserId());
+        experienceService.deleteExperience(experienceId);
         return ResponseEntity.noContent().build();
     }
 
@@ -72,7 +72,7 @@ public class ExperienceController {
     public ResponseEntity<List<ActivityResponse>> getExperienceActivities(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long experienceId) {
-        return ResponseEntity.ok(experienceService.getExperienceActivities(experienceId, userDetails.getUserId()));   
+        return ResponseEntity.ok(experienceService.getExperienceActivities(experienceId));   
     }
 
     @DeleteMapping("/{experienceId}/activities/{activityId}")
@@ -80,7 +80,7 @@ public class ExperienceController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long experienceId,
             @PathVariable Long activityId) {
-        experienceService.deleteActivity(experienceId, activityId, userDetails.getUserId());
+        experienceService.deleteActivity(experienceId, activityId);
         return ResponseEntity.noContent().build();
     }
 
@@ -94,19 +94,19 @@ public class ExperienceController {
         return ResponseEntity.ok(suggestions);
     }
 
-    @PostMapping("/{scheduleId}/refine")
+    @PostMapping("/{experienceId}/refine")
     public ResponseEntity<List<ActivityResponse>> refineSchedule(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long experienceId,
             @RequestParam String refinementPrompt) {
-        return ResponseEntity.ok(experienceService.refineExperience(experienceId, userDetails.getUserId(), refinementPrompt));
+        return ResponseEntity.ok(experienceService.refineExperience(experienceId, refinementPrompt));
     }
 
-    @PostMapping("/{scheduleId}/generate")
+    @PostMapping("/{experienceId}/generate")
     public ResponseEntity<List<ActivityResponse>> generateActivities(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long experienceId,
             @RequestParam String prompt) {
-        return ResponseEntity.ok(experienceService.generateActivities(experienceId, prompt, userDetails.getUserId()));
+        return ResponseEntity.ok(experienceService.generateActivities(experienceId, prompt));
     }
 } 

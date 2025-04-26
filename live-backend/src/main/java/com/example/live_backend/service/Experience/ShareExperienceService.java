@@ -30,17 +30,20 @@ public class ShareExperienceService {
     private final GroupService groupService;
 
     @Transactional
-    public void shareExperience(Long experienceId, Long ownerId, ShareExperienceRequest request) {
-        Experience experience = experienceService.getExperienceEntityById(experienceId, ownerId);
-        User sharedWith = userService.getUserEntityById(request.getSharedWithUserId());
-        ShareExperience share = shareExperienceMapper.toEntity(experience, sharedWith);
-        shareExperienceRepository.save(share);
+    public void shareExperience(ShareExperienceRequest request) {
+        Experience experience = experienceService.getExperienceEntityById(request.getExperienceId());
+        for (Long sharedWithUserId : request.getSharedWithUserIds()) {
+            User sharedWith = userService.getUserEntityById(sharedWithUserId);
+            ShareExperience share = shareExperienceMapper.toEntity(experience, sharedWith);
+            shareExperienceRepository.save(share);
+        }
     }
 
     @Transactional
-    public void unshareExperience(Long experienceId, Long ownerId, Long targetId) {
-        User targetUser = userService.getUserEntityById(targetId);
-        shareExperienceRepository.deleteByExperienceIdAndSharedWithId(experienceId, targetUser.getId());
+    public void unshareExperience(ShareExperienceRequest request) {
+        for (Long sharedWithUserId : request.getSharedWithUserIds()) {
+            shareExperienceRepository.deleteByExperienceIdAndSharedWithId(request.getExperienceId(), sharedWithUserId);
+        }
     }
 
     public List<ShareExperienceResponse> getSharedExperiences(Long userId) {

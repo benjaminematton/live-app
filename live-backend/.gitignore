@@ -48,3 +48,6 @@ ehthumbs.db
 *.tmp
 *.swp
 
+# Application properties
+src/main/resources/application.properties
+

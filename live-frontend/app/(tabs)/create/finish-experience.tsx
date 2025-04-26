@@ -9,12 +9,14 @@ import {
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
   Keyboard,
+  Switch,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useExperienceCreation } from '@/app/contexts/ExperienceCreationContext';
-import { createExperience } from '@/app/api/experience';
-import { UserResponse } from '@/app/types/types';
+import { createExperience, shareExperience } from '@/app/api/experience';
+import { UserResponse, ShareExperienceRequest } from '@/app/types/types';
+import { getFriends } from '@/app/api/user';
 
 export default function FinishExperience() {
   const router = useRouter();
@@ -35,17 +37,33 @@ export default function FinishExperience() {
     }
   };
 
+  useEffect(() => {
+    if (searchQuery.length >= 2) { 
+      getFriends(searchQuery).then(setFriendResults);
+    } else {
+      setFriendResults([]);
+    }
+  }, [searchQuery]);
+
   const toggleSelectAll = () => {
     setSelectAllFriends(!selectAllFriends);
     setSelectedFriends(friendResults);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     setExperienceData({
         ...experienceData,
-        visibility: share as 'PUBLIC' | 'PRIVATE' | 'FRIENDS',
+        visibility: visibility as 'PUBLIC' | 'PRIVATE' | 'FRIENDS',
     });
-    createExperience(JSON.stringify(experienceData));
+    const experience = await createExperience(experienceData);
+    if (selectedFriends.length > 0) {
+        const selectedFriendsIds = selectedFriends.map(friend => friend.id);
+        const shareExperienceRequest: ShareExperienceRequest = {
+            experienceId: experience.id,
+            sharedWithUserIds: selectedFriendsIds,
+        };
+        await shareExperience(shareExperienceRequest);
+    }
     router.push('/feed');
   };    
 
@@ -82,9 +100,10 @@ return (
           {/* Content */}
           <View style={styles.content}>
             <Text style={styles.heading}>Finalize Plan</Text>
-            <Text style={styles.subheading}>Finish up your plan by selecting a visibility and sending to friends</Text>
+            <Text style={styles.subheading}>Finish up your plan by selecting a visibility and inviting friends to join along!</Text>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 12 }}>
+                <Text>Share the visibility of your plan with other on the app:</Text>
                 {visibilityOptions.map((v) => (
                     <TouchableOpacity
                     key={v}
@@ -103,15 +122,22 @@ return (
                 ))}
             </View>
             <View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
+                <Text>Invite All Friends</Text>
+                <Switch
+                    value={selectAllFriends}
+                    onValueChange={toggleSelectAll}
+                />
+                </View>
+
                 <TextInput
                     placeholder="Search friends..."
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                 />
-
                 {friendResults.map(friend => (
                     <TouchableOpacity key={friend.id} onPress={() => toggleSelect(friend)}>
-                    <Text>{friend.fullName} ({friend.username})</Text>
+                        <Text>{friend.fullName} ({friend.username})</Text>
                     </TouchableOpacity>
                 ))}
             </View>
